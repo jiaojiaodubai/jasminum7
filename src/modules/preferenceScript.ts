@@ -1,43 +1,24 @@
-import { config } from "../../package.json";
+import { error } from "console";
+import { config, homepage } from "../../package.json";
 import { getString } from "../utils/locale";
+import { downloadTranslators, updateRowsData } from "./translator";
+
+export function registerPrefsWindow() {
+  ztoolkit.PreferencePane.register({
+    pluginID: config.addonID,
+    src: rootURI + "chrome/content/preferences.xhtml",
+    label: getString("prefs-title"),
+    image: `chrome://${config.addonRef}/content/icons/favicon.png`,
+    defaultXUL: true,
+    helpURL: homepage
+  });
+}
 
 export async function registerPrefsScripts(_window: Window) {
   // This function is called when the prefs window is opened
   // See addon/chrome/content/preferences.xul onpaneload
-  if (!addon.data.prefs) {
-    addon.data.prefs = {
-      window: _window,
-      columns: [
-        {
-          dataKey: "title",
-          label: getString("prefs-table-title"),
-          fixedWidth: true,
-          width: 100,
-        },
-        {
-          dataKey: "detail",
-          label: getString("prefs-table-detail"),
-        },
-      ],
-      rows: [
-        {
-          title: "Orange",
-          detail: "It's juicy",
-        },
-        {
-          title: "Banana",
-          detail: "It's sweet",
-        },
-        {
-          title: "Apple",
-          detail: "I mean the fruit APPLE",
-        },
-      ],
-    };
-  } else {
-    addon.data.prefs.window = _window;
-  }
-  updatePrefsUI();
+  addon.data.prefs.window = _window;
+  await updatePrefsUI();
   bindPrefEvents();
 }
 
@@ -45,87 +26,108 @@ async function updatePrefsUI() {
   // You can initialize some UI elements on prefs window
   // with addon.data.prefs.window.document
   // Or bind some events to the elements
-  const renderLock = ztoolkit.getGlobal("Zotero").Promise.defer();
-  if (addon.data.prefs?.window == undefined) return;
-  const tableHelper = new ztoolkit.VirtualizedTable(addon.data.prefs?.window)
-    .setContainerId(`${config.addonRef}-table-container`)
+  const renderLock = Zotero.Promise.defer();
+  ztoolkit.log("update rows: ", addon.data.prefs.translators);
+  if (addon.data.prefs.window == undefined) return;
+  addon.data.prefs.tableHelper =  new ztoolkit.VirtualizedTable(addon.data.prefs.window)
+    .setContainerId(`${config.addonRef}-translator-manager`)
     .setProp({
-      id: `${config.addonRef}-prefs-table`,
-      // Do not use setLocale, as it modifies the Zotero.Intl.strings
-      // Set locales directly to columns
-      columns: addon.data.prefs?.columns,
-      showHeader: true,
-      multiSelect: true,
-      staticColumns: true,
+      columns: [
+        {
+          dataKey: "zhLabel",
+          label: getString("prefs-table-column-translator-label"),
+        },
+        {
+          dataKey: "localeUpdateTime",
+          label: getString("prefs-table-column-locale-time"),
+          fixedWidth: true,
+          width: 135
+        },
+        {
+          dataKey: "remoteUpdateTime",
+          label: getString("prefs-table-column-remote-time"),
+          fixedWidth: true,
+          width: 135
+        },
+        {
+          dataKey: "status",
+          label: getString("prefs-table-column-status"),
+          fixedWidth: true,
+          width: 40
+        },
+      ],
       disableFontSizeScaling: true,
+      id: `${config.addonRef}-translator-table`,
+      multiSelect: true,
+      showHeader: true,
+      staticColumns: true
     })
-    .setProp("getRowCount", () => addon.data.prefs?.rows.length || 0)
+    .setProp("getRowCount", () => Object.keys(addon.data.prefs.translators).length || 0)
     .setProp(
       "getRowData",
-      (index) =>
-        addon.data.prefs?.rows[index] || {
-          title: "no data",
-          detail: "no data",
-        },
-    )
-    // Show a progress window when selection changes
-    .setProp("onSelectionChange", (selection) => {
-      new ztoolkit.ProgressWindow(config.addonName)
-        .createLine({
-          text: `Selected line: ${addon.data.prefs?.rows
-            .filter((v, i) => selection.isSelected(i))
-            .map((row) => row.title)
-            .join(",")}`,
-          progress: 100,
-        })
-        .show();
-    })
-    // When pressing delete, delete selected line and refresh table.
-    // Returning false to prevent default event.
-    .setProp("onKeyDown", (event: KeyboardEvent) => {
-      if (event.key == "Delete" || (Zotero.isMac && event.key == "Backspace")) {
-        addon.data.prefs!.rows =
-          addon.data.prefs?.rows.filter(
-            (v, i) => !tableHelper.treeInstance.selection.isSelected(i),
-          ) || [];
-        tableHelper.render();
-        return false;
-      }
-      return true;
-    })
-    // For find-as-you-type
-    .setProp(
-      "getRowString",
-      (index) => addon.data.prefs?.rows[index].title || "",
+      (index) => Object.values(addon.data.prefs.translators)[index]
     )
     // Render the table.
     .render(-1, () => {
       renderLock.resolve();
     });
+    updateTableUI();
   await renderLock.promise;
   ztoolkit.log("Preference table rendered!");
 }
 
-function bindPrefEvents() {
-  addon.data
-    .prefs!.window.document.querySelector(
-      `#zotero-prefpane-${config.addonRef}-enable`,
-    )
-    ?.addEventListener("command", (e) => {
-      ztoolkit.log(e);
-      addon.data.prefs!.window.alert(
-        `Successfully changed to ${(e.target as XUL.Checkbox).checked}!`,
-      );
-    });
+function updateTableUI() {
+  // 见zotero\chrome\content\zotero\preferences\preferences_cite.jsx
+  setTimeout(() => addon.data.prefs.tableHelper?.treeInstance.invalidate());
+}
 
-  addon.data
-    .prefs!.window.document.querySelector(
-      `#zotero-prefpane-${config.addonRef}-input`,
-    )
-    ?.addEventListener("change", (e) => {
-      ztoolkit.log(e);
-      addon.data.prefs!.window.alert(
-        `Successfully changed to ${(e.target as HTMLInputElement).value}!`,
-      );
+function bindPrefEvents() {
+  function listen(
+    selector: string,
+    // https://developer.mozilla.org/zh-CN/docs/Web/Events
+    type: string,
+    callback:  (event: Event) => void | Promise<void>
+  ): void {
+    addon.data.prefs.window!.document.querySelector(selector)
+    ?.addEventListener(type, (event) => {
+      ztoolkit.log(event);
+      callback(event);
     });
+  }
+  listen(
+    `#zotero-prefpane-${config.addonRef}`,
+    "showing",
+    async () => {
+      updateTableUI();
+  })
+  listen(
+    `#${config.addonRef}-refresh-translators`,
+    "click",
+    async (_event) => {
+      await updateRowsData()
+        .then(() => {
+          updateTableUI();
+          new ztoolkit.ProgressWindow(config.addonName)
+          .createLine({
+            text: getString("progress-translator-refresh"),
+            type: "success",
+          })
+          .show();
+        })
+        .catch((error) => {
+          ztoolkit.log(error);
+          new ztoolkit.ProgressWindow(config.addonName)
+          .createLine({
+            text: getString("progress-something-wrong"),
+            type: "fail",
+          })
+          .show();
+        })
+    }
+  )
+  listen(
+    `#${config.addonRef}-download-translators`,
+    "click",
+    async () => { await downloadTranslators(true) }
+  )
 }

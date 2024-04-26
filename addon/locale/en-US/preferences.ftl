@@ -1,5 +1,6 @@
-pref-title = Addon Template Example
-pref-enable =
-    .label = Enable
-pref-input = Input
+table-title = Chinese Translators
+refresh-button = 
+    .label = Refresh
+update-button = 
+    .label = Update
 pref-help = { $name } Build { $version } { $time }

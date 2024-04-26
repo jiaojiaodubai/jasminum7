@@ -1,5 +1,6 @@
-pref-title = 插件模板设置示例
-pref-enable =
-    .label = 开启
-pref-input = 输入
+table-title = 非官方维护转换器
+refresh-button = 
+    .label = 刷新
+update-button = 
+    .label = 更新
 pref-help = { $name } Build { $version } { $time }

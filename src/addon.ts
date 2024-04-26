@@ -1,7 +1,8 @@
-import { ColumnOptions } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
-import { DialogHelper } from "zotero-plugin-toolkit/dist/helpers/dialog";
 import hooks from "./hooks";
 import { createZToolkit } from "./utils/ztoolkit";
+import { TranslatorRow } from "./modules/translator";
+import { getPref } from "./utils/prefs";
+import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 
 class Addon {
   public data: {
@@ -12,12 +13,12 @@ class Addon {
     locale?: {
       current: any;
     };
-    prefs?: {
-      window: Window;
-      columns: Array<ColumnOptions>;
-      rows: Array<{ [dataKey: string]: string }>;
+    prefs: {
+      window?: Window;
+      tableHelper?: VirtualizedTableHelper;
+      translators: { [filename: string]: TranslatorRow };
+      lastCheck: number
     };
-    dialog?: DialogHelper;
   };
   // Lifecycle hooks
   public hooks: typeof hooks;
@@ -29,6 +30,10 @@ class Addon {
       alive: true,
       env: __env__,
       ztoolkit: createZToolkit(),
+      prefs: {
+        translators: {},
+        lastCheck: getPref("lastCheck") as number || 0
+      }
     };
     this.hooks = hooks;
     this.api = {};
