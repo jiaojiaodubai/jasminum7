@@ -1,10 +1,10 @@
 {
   "addons": {
-    "addontemplate@euclpts.com": {
+    "jasminum@linxzh.com": {
       "updates": [
         {
-          "version": "1.1.1",
-          "update_link": "https://github.com/windingwind/zotero-addon-template/releases/latest/download/zotero-addon-template.xpi",
+          "version": "1.0.1",
+          "update_link": "https://github.com/l0o0/jasminum/releases/latest/download/jasminum.xpi",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999"

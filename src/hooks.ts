@@ -1,9 +1,13 @@
 import { registerNotifier } from "./modules/notifier";
 import { config } from "../package.json";
 import { getString, initLocale } from "./utils/locale";
-import { registerPrefsScripts, registerPrefsWindow} from "./modules/preferenceScript";
+import {
+  registerPrefsScripts,
+  registerPrefsWindow,
+} from "./modules/preferenceScript";
 import { createZToolkit } from "./utils/ztoolkit";
 import { downloadTranslators, updateRowsData } from "./modules/translator";
+import { registerMenu } from "./modules/menu";
 
 async function onStartup() {
   await Promise.all([
@@ -42,7 +46,7 @@ async function onMainWindowLoad(_win: Window): Promise<void> {
       progress: 0,
     })
     .show();
-  
+
   await updateRowsData();
   downloadTranslators();
 
@@ -50,6 +54,8 @@ async function onMainWindowLoad(_win: Window): Promise<void> {
     progress: 30,
     text: `[30%] ${getString("startup-begin")}`,
   });
+
+  registerMenu();
 
   popupWin.changeLine({
     progress: 100,
@@ -94,5 +100,5 @@ export default {
   onShutdown,
   onMainWindowLoad,
   onMainWindowUnload,
-  onPrefsEvent
+  onPrefsEvent,
 };

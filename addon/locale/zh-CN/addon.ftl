@@ -11,3 +11,7 @@ progress-translator-download-successfully = 转换器下载完毕
 progress-translator-download-failed = 转换器下载失败
 progress-translator-download-done = 转换器更新完成
 progress-translator-download-skip = 已跳过转换器更新
+progress-search-no-results = 无检索结果
+progress-search-unselected = 未选中任何条目
+menu-root = 茉莉花
+menu-retrieveMetadata = 抓取元数据

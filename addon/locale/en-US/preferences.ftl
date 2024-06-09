@@ -1,6 +1,9 @@
+retrieveMetadata-title = Retrieve Metadata
+isOversea =
+    .label = CNKI Oversea
 table-title = Chinese Translators
 refresh-button = 
-    .label = Refresh
+    .label = Refresh Table
 update-button = 
-    .label = Update
+    .label = Force Update
 pref-help = { $name } Build { $version } { $time }
