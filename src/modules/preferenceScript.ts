@@ -8,9 +8,9 @@ export function registerPrefsWindow() {
     pluginID: config.addonID,
     src: rootURI + "chrome/content/preferences.xhtml",
     label: getString("prefs-title"),
-    image: `chrome://${config.addonRef}/content/icons/favicon.png`,
+    image: `chrome://${config.addonRef}/content/icons/favicon.svg`,
     defaultXUL: true,
-    helpURL: homepage
+    helpURL: homepage,
   });
 }
 
@@ -29,7 +29,9 @@ async function updatePrefsUI() {
   const renderLock = Zotero.Promise.defer();
   ztoolkit.log("update rows: ", addon.data.prefs.translators);
   if (addon.data.prefs.window == undefined) return;
-  addon.data.prefs.tableHelper =  new ztoolkit.VirtualizedTable(addon.data.prefs.window)
+  addon.data.prefs.tableHelper = new ztoolkit.VirtualizedTable(
+    addon.data.prefs.window,
+  )
     .setContainerId(`${config.addonRef}-translator-manager`)
     .setProp({
       columns: [
@@ -41,37 +43,40 @@ async function updatePrefsUI() {
           dataKey: "localeUpdateTime",
           label: getString("prefs-table-column-locale-time"),
           fixedWidth: true,
-          width: 135
+          width: 135,
         },
         {
           dataKey: "remoteUpdateTime",
           label: getString("prefs-table-column-remote-time"),
           fixedWidth: true,
-          width: 135
+          width: 135,
         },
         {
           dataKey: "status",
           label: getString("prefs-table-column-status"),
           fixedWidth: true,
-          width: 40
+          width: 40,
         },
       ],
       disableFontSizeScaling: true,
       id: `${config.addonRef}-translator-table`,
       multiSelect: true,
       showHeader: true,
-      staticColumns: true
+      staticColumns: true,
     })
-    .setProp("getRowCount", () => Object.keys(addon.data.prefs.translators).length || 0)
+    .setProp(
+      "getRowCount",
+      () => Object.keys(addon.data.prefs.translators).length || 0,
+    )
     .setProp(
       "getRowData",
-      (index) => Object.values(addon.data.prefs.translators)[index]
+      (index) => Object.values(addon.data.prefs.translators)[index],
     )
     // Render the table.
     .render(-1, () => {
       renderLock.resolve();
     });
-    updateTableUI();
+  updateTableUI();
   await renderLock.promise;
   ztoolkit.log("Preference table rendered!");
 }
@@ -86,48 +91,40 @@ function bindPrefEvents() {
     selector: string,
     // https://developer.mozilla.org/zh-CN/docs/Web/Events
     type: string,
-    callback:  (event: Event) => void | Promise<void>
+    callback: (event: Event) => void | Promise<void>,
   ): void {
-    addon.data.prefs.window!.document.querySelector(selector)
-    ?.addEventListener(type, (event) => {
-      ztoolkit.log(event);
-      callback(event);
-    });
+    addon.data.prefs
+      .window!.document.querySelector(selector)
+      ?.addEventListener(type, (event) => {
+        ztoolkit.log(event);
+        callback(event);
+      });
   }
-  listen(
-    `#zotero-prefpane-${config.addonRef}`,
-    "showing",
-    async () => {
-      updateTableUI();
-  })
-  listen(
-    `#${config.addonRef}-refresh-translators`,
-    "click",
-    async (_event) => {
-      await updateRowsData()
-        .then(() => {
-          updateTableUI();
-          new ztoolkit.ProgressWindow(config.addonName)
+  listen(`#zotero-prefpane-${config.addonRef}`, "showing", async () => {
+    updateTableUI();
+  });
+  listen(`#${config.addonRef}-refresh-translators`, "click", async (_event) => {
+    await updateRowsData()
+      .then(() => {
+        updateTableUI();
+        new ztoolkit.ProgressWindow(config.addonName)
           .createLine({
             text: getString("progress-translator-refresh"),
             type: "success",
           })
           .show();
-        })
-        .catch((error) => {
-          ztoolkit.log(error);
-          new ztoolkit.ProgressWindow(config.addonName)
+      })
+      .catch((error) => {
+        ztoolkit.log(error);
+        new ztoolkit.ProgressWindow(config.addonName)
           .createLine({
             text: getString("progress-something-wrong"),
             type: "fail",
           })
           .show();
-        })
-    }
-  )
-  listen(
-    `#${config.addonRef}-download-translators`,
-    "click",
-    async () => { await downloadTranslators(true) }
-  )
+      });
+  });
+  listen(`#${config.addonRef}-download-translators`, "click", async () => {
+    await downloadTranslators(true);
+  });
 }

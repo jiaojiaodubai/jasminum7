@@ -11,3 +11,6 @@ progress-translator-download-successfuly = Translator download successfully
 progress-translator-download-failed = Translator download failed
 progress-translator-download-done = Translators downloaded
 progress-translator-download-skip = Skip updating translators
+progress-search-no-results = no search results found
+menu-root = Jasminum
+menu-retrieveMetadata = Retrieve Metadata

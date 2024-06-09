@@ -1,4 +1,5 @@
 import { config } from "../../package.json";
+import { retrieveMetadata } from "./services";
 
 export function registerNotifier() {
   const callback = {
@@ -36,8 +37,8 @@ function unregisterNotifier(notifierID: string) {
 /* 由此处开始书写回调函数 */
 
 /**
-* 将所有notify的响应组织起来
-*/
+ * 将所有notify的响应组织起来
+ */
 async function onNotify(
   event: string,
   type: string,
@@ -47,20 +48,8 @@ async function onNotify(
   // You can add your code to the corresponding notify type
   ztoolkit.log("notify", event, type, ids, extraData);
   if (event == "add" && type == "item") {
-    autoRecognizeItems();
-  }
-  else {
+    retrieveMetadata(Zotero.Items.get(ids as number[]));
+  } else {
     return;
   }
-}
-
-// 此处参照了Zotero.RecognizeDocument.autoRecognizeItems的命名
-function autoRecognizeItems() {
-  new ztoolkit.ProgressWindow(config.addonName)
-    .createLine({
-      text: "auto recognize items…",
-      type: "success",
-      progress: 100,
-    })
-    .show();
 }
