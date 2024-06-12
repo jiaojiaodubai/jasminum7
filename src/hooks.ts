@@ -16,13 +16,6 @@ async function onStartup() {
     Zotero.uiReadyPromise,
   ]);
 
-  // TODO: Remove this after zotero#3387 is merged
-  if (__env__ === "development") {
-    // Keep in sync with the scripts/startup.mjs
-    const loadDevToolWhen = `Plugin ${config.addonID} startup`;
-    ztoolkit.log(loadDevToolWhen);
-  }
-
   initLocale();
 
   registerPrefsWindow();
@@ -35,6 +28,9 @@ async function onStartup() {
 async function onMainWindowLoad(_win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
+
+  // @ts-ignore This is a moz feature
+  window.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
 
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
