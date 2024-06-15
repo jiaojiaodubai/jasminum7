@@ -212,8 +212,8 @@ class PDFTitleManager {
           ((fontSize == docLine.dataset.fontSize &&
             firstWord[12].toString() == docLine.dataset.LastfontIndex) ||
             // 根据上下文语境推测语句未结束
-            /[\u4e00-\u9fff\w]([、，：]|—{1,2})$/i.test(docLine.textContent) ||
-            /^—{1,2}[\u4e00-\u9fff\w]/.test(text)) &&
+            /[a-z\d\u4e00-\u9fff]([、，：]|—{1,2})$/i.test(docLine.textContent) ||
+            /^—{1,2}[a-z\d\u4e00-\u9fff]/i.test(text)) &&
           // 都含有中文（中文文本），或者都不含中文（外文文本）
           xnor(hasCJK(docLine.textContent), hasCJK(text))
         ) {
