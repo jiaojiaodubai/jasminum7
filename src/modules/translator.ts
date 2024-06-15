@@ -97,6 +97,7 @@ async function downloadTranslator(filename: string): Promise<void> {
 export async function downloadTranslators(
   force: boolean = false,
 ): Promise<void> {
+  await updateRowsData();
   const translators = addon.data.prefs.translators;
   let todo = Object.keys(translators);
   if (!force) {

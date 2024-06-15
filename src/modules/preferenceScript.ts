@@ -103,27 +103,6 @@ function bindPrefEvents() {
   listen(`#zotero-prefpane-${config.addonRef}`, "showing", async () => {
     updateTableUI();
   });
-  listen(`#${config.addonRef}-refresh-translators`, "click", async (_event) => {
-    await updateRowsData()
-      .then(() => {
-        updateTableUI();
-        new ztoolkit.ProgressWindow(config.addonName)
-          .createLine({
-            text: getString("progress-translator-refresh"),
-            type: "success",
-          })
-          .show();
-      })
-      .catch((error) => {
-        ztoolkit.log(error);
-        new ztoolkit.ProgressWindow(config.addonName)
-          .createLine({
-            text: getString("progress-something-wrong"),
-            type: "fail",
-          })
-          .show();
-      });
-  });
   listen(`#${config.addonRef}-download-translators`, "click", async () => {
     await downloadTranslators(true);
   });

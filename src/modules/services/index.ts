@@ -3,6 +3,7 @@ import { getString } from "../../utils/locale";
 import { isChineseTopAttachment } from "../menu";
 import { requestDocument, text2HTMLDoc } from "../../utils/http";
 import { renameAttachmentFromParent, selectItems } from "../../utils/translate";
+import { getPref } from "../../utils/prefs";
 
 export class API implements Service {
   constructor(service: Service) {
@@ -53,6 +54,10 @@ export class API implements Service {
             await requestDocument(urls[0]),
             attachmentItem,
           );
+          // 有时，Zotero自己的机制已经根据DOI匹配到了条目，这时我们不要做任何事情
+          if (attachmentItem.parentID) {
+            return true;
+          }
           attachmentItem.parentID = item.id;
           await attachmentItem.saveTx();
           await renameAttachmentFromParent(attachmentItem);
@@ -104,6 +109,7 @@ export function initAPIs() {
 }
 
 export async function retrieveMetadata(items: Zotero.Item[]) {
+  if (!getPref("autoRecognizeItems")) return;
   for (const item of items) {
     const isCNTA = isChineseTopAttachment(item);
     ztoolkit.log(`retrieve metadata for item ${item.id}`);

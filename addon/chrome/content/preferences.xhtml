@@ -14,12 +14,20 @@
     <label>
       <html:h2 data-l10n-id="retrieveMetadata-title"></html:h2>
     </label>
-    <checkbox
-      id="__addonRef__-isOversea"
-      preference="__prefsPrefix__.isOversea"
-      data-l10n-id="isOversea"
-      native="true"
-    />
+    <hbox>
+      <checkbox
+        id="__addonRef__-isOversea"
+        preference="__prefsPrefix__.isOversea"
+        data-l10n-id="isOversea"
+        native="true"
+      />
+      <checkbox
+        id="__addonRef__-autoRecognizeItems"
+        preference="__prefsPrefix__.autoRecognizeItems"
+        data-l10n-id="autoRecognizeItems"
+        native="true"
+      />
+    </hbox>
   </groupbox>
   <groupbox>
     <label>
@@ -31,15 +39,8 @@
     <separator class="thin" />
     <hbox>
       <button
-        data-l10n-id="refresh-button"
-        id="__addonRef__-refresh-translators"
-        flex="0.5"
-        native="true"
-      />
-      <button
         data-l10n-id="update-button"
         id="__addonRef__-download-translators"
-        flex="0.5"
         native="true"
       />
     </hbox>
