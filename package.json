@@ -28,7 +28,6 @@
     "release": "zotero-plugin release",
     "update-deps": "npm update --save"
   },
-  
   "dependencies": {
     "zotero-plugin-toolkit": "^2.3.31"
   },

@@ -212,13 +212,13 @@ class PDFTitleManager {
           ((fontSize == docLine.dataset.fontSize &&
             firstWord[12].toString() == docLine.dataset.LastfontIndex) ||
             // 根据上下文语境推测语句未结束
-            /[、，：:—]$/.test(docLine.textContent) ||
-            /^——/.test(text)) &&
+            /[\u4e00-\u9fff\w]([、，：]|—{1,2})$/i.test(docLine.textContent) ||
+            /^—{1,2}[\u4e00-\u9fff\w]/.test(text)) &&
           // 都含有中文（中文文本），或者都不含中文（外文文本）
           xnor(hasCJK(docLine.textContent), hasCJK(text))
         ) {
           docLine.textContent +=
-            /[\u4e00-\u9fff、，：:—]$/.test(docLine.textContent) &&
+            /[\u4e00-\u9fff、，：—]$/.test(docLine.textContent) &&
             /^[\u4e00-\u9fff—]/.test(text)
               ? text
               : ` ${text}`;
@@ -254,7 +254,7 @@ class PDFTitleManager {
       case "number":
         return lines[extraRule].text || "";
       case "string":
-        return lines.find(line => line.text != extraRule)?.text || "";
+        return lines.find((line) => line.text != extraRule)?.text || "";
       default:
         return lines[0].text || "";
     }
@@ -483,7 +483,7 @@ function normalize(str: string) {
 
 const exceptions: { [key: string]: number | string } = {
   "河北大学学报（哲学社会科学版）": 1,
-  环境科学学报: "环境科学学报"
-}
+  环境科学学报: "环境科学学报",
+};
 
 export { DocTools, selectItems, renameAttachmentFromParent, getPDFTitle };

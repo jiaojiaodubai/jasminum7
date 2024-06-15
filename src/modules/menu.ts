@@ -41,8 +41,8 @@ export function registerMenu() {
     icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
     children: menuitems.map((subOption) => {
       const label = subOption.label as string;
-      (subOption.id = `${config.addonRef}-menu-${label}`),
-        (subOption.label = getString(`menu-${label}`));
+      subOption.id = `${config.addonRef}-menu-${label}`;
+      subOption.label = getString(`menu-${label}`);
       return subOption;
     }),
   };
